@@ -1,0 +1,11 @@
+.btn-folder {
+    color: #fff;
+    background-color: #5A67D8; /* 예시: 보라색 계열 */
+    border-color: #5A67D8;
+}
+
+.btn-folder:hover {
+    color: #fff;
+    background-color: #434190; /* 마우스를 올렸을 때 조금 더 어둡게 */
+    border-color: #434190;
+}

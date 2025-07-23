@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}대시보드 - 푸드 트렌드 분석{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">트렌드 분석 대시보드</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary">월별</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary">분기별</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary">연도별</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>음식 트렌드 Top 10</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for trend in food_trends %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ loop.index }}. {{ trend.menu_name }}
+                                <span class="badge bg-primary rounded-pill">{{ trend.mention_count }} 회</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">표시할 데이터가 없습니다.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>식재료 트렌드 Top 10</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for trend in ingredient_trends %}
+                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ loop.index }}. {{ trend.ingredient_name }}
+                                <span class="badge bg-success rounded-pill">{{ trend.usage_frequency }} 회</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">표시할 데이터가 없습니다.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5>주요 음식 언급량 변화</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="foodTrendChart"></canvas>
+                    <p class="text-center text-muted mt-2">차트 시각화 영역입니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

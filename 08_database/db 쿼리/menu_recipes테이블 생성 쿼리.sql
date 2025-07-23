@@ -1,0 +1,1 @@
+insert into brands (brand_name) values ('버거킹'),('쉑쉑버거'),('롯데리아'),('에그드롭'),('서브웨이'),('홍루이젠');

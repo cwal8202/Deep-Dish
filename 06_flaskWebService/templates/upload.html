@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}이미지 업로드 - 푸드 트렌드 분석{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2 class="h3">이미지 파일/폴더 업로드</h2>
+                    <p class="text-muted">분석할 이미지 파일 또는 폴더를 선택하거나 아래 영역으로 드래그하세요.</p>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                        
+                        <div id="drop-zone" class="text-center p-5 border-2 border-dashed rounded-3">
+                            <p>여기로 파일 또는 폴더를 드래그하세요</p>
+                            <p class="small text-muted">또는</p>
+                            <div class="btn-group" role="group">
+                                <label id="file-btn" class="btn btn-secondary">파일 선택</label>
+                                <label id="folder-btn" class="btn btn-folder">폴더 선택</label>
+                            </div>
+                            <input type="file" id="file-input" name="image_files" multiple class="d-none">
+                            <input type="file" id="folder-input" name="image_files" webkitdirectory class="d-none">
+                        </div>
+
+                        <div id="file-list" class="mt-3"></div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button id="upload-btn" type="submit" class="btn btn-primary btn-lg" disabled>
+                                업로드 시작
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const folderInput = document.getElementById('folder-input');
+    const fileBtn = document.getElementById('file-btn');
+    const folderBtn = document.getElementById('folder-btn');
+    const fileList = document.getElementById('file-list');
+    const uploadBtn = document.getElementById('upload-btn');
+    let selectedFiles = [];
+
+    // '파일 선택' 버튼 클릭 시 파일 입력창 열기
+    fileBtn.addEventListener('click', () => fileInput.click());
+    // '폴더 선택' 버튼 클릭 시 폴더 입력창 열기
+    folderBtn.addEventListener('click', () => folderInput.click());
+
+    // 드래그 이벤트 (폴더 드래그는 브라우저별 지원이 다를 수 있음)
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-primary'); });
+    dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('border-primary'); });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-primary');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // 파일 또는 폴더가 선택되었을 때의 이벤트 처리
+    fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+    folderInput.addEventListener('change', () => handleFiles(folderInput.files));
+
+    function handleFiles(files) {
+        selectedFiles = [...files];
+        fileList.innerHTML = '';
+        if (selectedFiles.length === 0) {
+            uploadBtn.disabled = true;
+            return;
+        }
+
+        const list = document.createElement('ul');
+        list.className = 'list-group';
+        selectedFiles.forEach(file => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            // 폴더 선택 시 파일의 상대 경로도 함께 표시
+            const displayName = file.webkitRelativePath || file.name;
+            listItem.textContent = `${displayName} (${(file.size / 1024).toFixed(2)} KB)`;
+            list.appendChild(listItem);
+        });
+        fileList.appendChild(list);
+        uploadBtn.disabled = false;
+    }
+</script>
+
+<style>
+    .border-dashed { border-style: dashed !important; }
+    #upload-btn:disabled { opacity: 0.1; cursor: not-allowed; }
+</style>
+{% endblock %}
