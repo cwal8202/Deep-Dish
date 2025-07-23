@@ -6,10 +6,17 @@ import os # os 모듈 추가
 from dotenv import load_dotenv # dotenv 모듈 추가
 from database.repository.db_connection import get_db_connection
 from database.repository import menus_repository
+from datetime import datetime
+import uploads
 
 load_dotenv() # .env 파일에서 환경 변수를 불러옴
 
 app = Flask(__name__)
+
+# 1) 업로드 폴더 경로를 선언하고, 없으면 생성
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def dashboard():
@@ -45,19 +52,24 @@ def dashboard():
 def upload_file():
     """파일 업로드 화면 및 처리"""
     if request.method == 'POST':
+        uploaded_files = uploads.upload_file(request.files.getlist('image_files'))
         # 'image_files'라는 이름으로 전송된 파일들을 리스트로 받음
         uploaded_files = request.files.getlist('image_files')
-        
+
         if not uploaded_files or uploaded_files[0].filename == '':
             print("파일이 선택되지 않았습니다.")
             return redirect(request.url)
+
+        # 1) 월별 폴더명 생성 (YYYYMM)
+        month_folder = datetime.now().strftime("%Y%m")
+        os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], month_folder), exist_ok=True)
 
         for file in uploaded_files:
             if file:
                 # 안전한 파일 이름으로 변경
                 filename = secure_filename(file.filename)
                 # 파일을 지정된 폴더에 저장
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], month_folder,filename))
                 print(f"'{filename}' 파일 저장 완료.")
         
         # 업로드 완료 후, 결과 페이지나 대시보드로 리다이렉트
