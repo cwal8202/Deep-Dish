@@ -25,10 +25,8 @@ def dashboard():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True) # 결과를 딕셔너리로 받기
 
-    test_data = menus_repository.get_menus(cursor)
-
     # 월별 음식 트렌드 TOP 10 쿼리
-    query = """
+    food_query = """
     SELECT m.menu_name, COUNT(ar.result_id) AS mention_count
     FROM images AS i
     JOIN analysis_results AS ar ON i.image_id = ar.image_id
@@ -40,30 +38,53 @@ def dashboard():
     GROUP BY m.menu_name
     ORDER BY mention_count DESC LIMIT 10;
     """
-    cursor.execute(query)
+    cursor.execute(food_query)
     food_trends = cursor.fetchall() # 쿼리 결과
+
+    # 월별 식재료 트렌드 TOP 10 쿼리 추가
+    ingredient_query = """
+    SELECT 
+        i.ingredient_name, 
+        COUNT(mi.menu_id) AS usage_frequency
+    FROM 
+        analysis_results ar
+    JOIN 
+        menu_ingredients mi ON ar.detected_id = mi.menu_id
+    JOIN 
+        ingredients i ON mi.ingredient_id = i.ingredient_id
+    WHERE 
+        ar.result_type = 'FOOD'
+        AND i.ingredient_category = 'main'
+        AND ar.created_at BETWEEN '2025-06-01 00:00:00' AND '2025-06-30 23:59:59'
+    GROUP BY 
+        i.ingredient_name
+    ORDER BY 
+        usage_frequency DESC 
+    LIMIT 10;
+    """
+    cursor.execute(ingredient_query)
+    ingredient_trends = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
-    # DB에서 가져온 데이터를 HTML 템플릿으로 전달
-    return render_template('dashboard.html', food_trends=food_trends)
+    return render_template('dashboard.html', food_trends=food_trends, ingredient_trends=ingredient_trends)
+
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     """파일 업로드 화면 및 처리"""
     if request.method == 'POST':
         uploaded_files = request.files.getlist('image_files')
-        
+        print()
         # 수정된 함수를 호출하고, 저장된 파일 경로 리스트를 받습니다.
         saved_info_list = upload_service.save_uploaded_files(app.config, uploaded_files)
 
         if saved_info_list:
             # 예측 함수를 호출하고, 결과를 받아옵니다.
+            # 만약 menu_id 없으면 예측결과를 저장하지 않았습니다.
             prediction_results = predict_service.save_food_prediction(saved_info_list)
-            # prediction_results = predictor.run_prediction(saved_filepaths)
 
-            # 예측 결과를 담아 결과 페이지로 전달
             return render_template('prediction_results.html', results=prediction_results)
         else:
             print("파일이 없습니다.")

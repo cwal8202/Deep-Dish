@@ -5,6 +5,7 @@ import mimetypes # mimetypes 모듈 추가
 import mysql
 from models import Image
 from database.repository import images_repository
+import uuid # uuid 모듈 추가
 
 # 허용할 파일 확장자 및 MIME 타입 설정
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -37,24 +38,20 @@ def save_uploaded_files(app_config, uploaded_files):
     for file in uploaded_files:
         if file and file.filename != '' and allowed_file(file.filename):
             try:
-                # 1. 파일 이름을 안전하게 변경하고 저장 경로 설정
-                filename = secure_filename(file.filename)
-                full_filepath = os.path.join(save_path, filename)
-
+                # 1. 파일 이름을 고유하게 변경하고 저장 경로 설정
+                original_filename, extension = os.path.splitext(file.filename)
+                unique_filename = f"{uuid.uuid4()}{extension}" # uuid로 고유한 이름 생성
+                full_filepath = os.path.join(save_path, unique_filename)
+                
                 # 2. 파일을 물리적으로 저장
                 file.save(full_filepath)
 
                 # 3. DB에 이미지 정보 저장
-                # DB 저장에 필요한 데이터만 담은 객체를 생성합니다.
-                # 'upload'는 image_source의 값이라고 가정
-                image_info = Image(image_url=full_filepath, image_source='upload', created_at=datetime.utcnow())
-                
-                # 리포지토리 함수를 호출하고 반환값을 확인
+                image_info = Image(image_url=full_filepath, image_source='upload', created_at=datetime.now())
                 new_image_id = images_repository.add_image(image_info)
-                
+
                 if new_image_id:
-                    print(f"'{filename}' 파일 저장 및 DB 기록 완료. ID: {new_image_id}")
-                    # 성공 시 image_id와 filepath를 딕셔너리로 묶어 리스트에 추가
+                    print(f"'{unique_filename}' 파일 저장 및 DB 기록 완료. ID: {new_image_id}")
                     saved_info_list.append((new_image_id, full_filepath))
                 else:
                     # DB 저장 실패 시, 이미 저장된 파일 삭제 (롤백)

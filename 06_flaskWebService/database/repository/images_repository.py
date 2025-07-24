@@ -3,7 +3,7 @@ from typing import List, Dict
 import mysql.connector
 from models import Image
 
-def add_image(image: Image) -> int:
+def add_image(upload_image: Image) -> int:
     """
     이미지를 DB에 저장하고, 생성된 ID를 반환합니다.
     """
@@ -13,7 +13,7 @@ def add_image(image: Image) -> int:
         conn = get_db_connection()
         cursor = conn.cursor()
         sql = "INSERT INTO images (image_url, image_source, created_at) VALUES (%(image_url)s, %(image_source)s, %(created_at)s)"
-        cursor.execute(sql, image.model_dump())
+        cursor.execute(sql, upload_image.model_dump())
         conn.commit()
         
         # INSERT 쿼리로 생성된 행의 ID를 가져옵니다.

@@ -13,6 +13,7 @@ from tensorflow.keras.applications import EfficientNetB0, ResNet50V2
 from tensorflow.keras.applications.efficientnet import preprocess_input as eff_pre
 from tensorflow.keras.applications.resnet_v2 import preprocess_input as res_pre
 from typing import List, Dict, Any
+import label_eng_to_kor
 
 
 IMG_SIZE = (224, 224)
@@ -77,47 +78,49 @@ def predict_image(path: str,
 
     return label, confidence, probs
 
-def run_prediction(raw_paths: List[str]) -> List[Dict[str, Any]]:
-    # ─── 변수 정의 ───────────────────────────────────────────
-    MODEL_DIR = 'models' # ******** 모델 경로 ***********
-    TIMESTAMP = '20250716_144252' # ******** 모델 명 ***********
-    
-    # ─── 이미지 경로 정리 ─────────────────────────────────────
-    IMAGE_PATHS = []
-    
+def run_prediction(saved_info_list: list[tuple[int, str]]) -> List[Dict[str, Any]]:
     # predict.py 파일이 있는 디렉터리의 절대 경로를 얻습니다.
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    for p in raw_paths:
-        full_path = os.path.join(base_dir, '..', p)
-
-        if os.path.isdir(full_path):
-            for ext in ('*.jpg','*.jpeg','*.png','*.bmp','*.webp'):
-                IMAGE_PATHS += glob.glob(os.path.join(full_path, ext))
-        elif os.path.isfile(full_path):
-            IMAGE_PATHS.append(full_path)
-        else:
-            print(f"경로 없음: {full_path}")
-
-    if not IMAGE_PATHS:
-        print("예측할 이미지가 없습니다.")
-        return []
+    # ─── 변수 정의 ───────────────────────────────────────────
+    MODEL_DIR = os.path.join(base_dir, 'models') # ******** 모델 경로 ***********
+    TIMESTAMP = '20250716_144252' # ******** 모델 명 ***********
 
     # ─── 모델 로드 & 예측 루프 ─────────────────────────────────
     eff_model, res_model, xgb_model, idx2label = load_models(MODEL_DIR, TIMESTAMP)
-    
+
     results = [] # 예측 결과를 담을 리스트
-    for img_path in IMAGE_PATHS:
-        label, conf, probs = predict_image(img_path, eff_model, res_model, xgb_model, idx2label)
-        
+
+    # saved_info_list를 순회하며 image_id와 filepath를 각각 가져옵니다.
+    for image_id, img_path in saved_info_list:
+        full_path = os.path.join(base_dir, '..', img_path)
+
+        # 파일이 존재하는지 확인하는 로직
+        if not os.path.isfile(full_path):
+            print(f"경로 없음: {full_path}")
+            continue # 다음 파일로 넘어감
+
+        # 예측 실행
+        label, conf, probs = predict_image(full_path, eff_model, res_model, xgb_model, idx2label)
+        kor_label = label_eng_to_kor.ENG_TO_KOR_MENU_MAP[label]
+
+        # 상위 5개 항목 추출 로직
+        sorted_probs = sorted(probs.items(), key=lambda item: item[1], reverse=True)
+        top5_probs_eng = dict(sorted_probs[:5])
+        # 딕셔너리 컴프리헨션을 사용해 키를 한글로 변경하고 값은 반올림
+        top_5_probs_kor = {
+            # get() 메서드로 안전하게 값 가져오기
+            label_eng_to_kor.ENG_TO_KOR_MENU_MAP.get(k, k): round(v, 2)
+            for k, v in top5_probs_eng.items()
+        }
+
         # 예측 결과를 딕셔너리 형태로 저장
         results.append({
-            'file_name': os.path.basename(img_path),
-            'predicted_label': label,
-            'confidence': conf,
-            'probabilities': probs
+            'image_id': image_id, # image_id 추가
+            'file_path': os.path.basename(full_path),
+            'predicted_label': kor_label,
+            'confidence': round(float(conf), 2),
+            'probabilities': top_5_probs_kor
         })
-        print(label, conf, probs, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    for result in results:
-        print(result, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    
     return results # 최종 결과 리스트 반환
