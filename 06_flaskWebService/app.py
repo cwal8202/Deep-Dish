@@ -2,19 +2,20 @@
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 import mysql.connector
-import os # os 모듈 추가
-from dotenv import load_dotenv # dotenv 모듈 추가
+import os
+from dotenv import load_dotenv
 from database.repository.db_connection import get_db_connection
 from database.repository import menus_repository
 from datetime import datetime
-import uploads
+import service.upload_service as upload_service
+import service.predict_service as predict_service
 
 load_dotenv() # .env 파일에서 환경 변수를 불러옴
 
 app = Flask(__name__)
 
 # 1) 업로드 폴더 경로를 선언하고, 없으면 생성
-UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+UPLOAD_FOLDER = os.path.join(app.root_path, 'upload_datas')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -26,7 +27,7 @@ def dashboard():
 
     test_data = menus_repository.get_menus(cursor)
 
-    # 예시: 월별 음식 트렌드 TOP 10 쿼리
+    # 월별 음식 트렌드 TOP 10 쿼리
     query = """
     SELECT m.menu_name, COUNT(ar.result_id) AS mention_count
     FROM images AS i
@@ -40,7 +41,7 @@ def dashboard():
     ORDER BY mention_count DESC LIMIT 10;
     """
     cursor.execute(query)
-    food_trends = cursor.fetchall() # 쿼리 결과를 가져옴
+    food_trends = cursor.fetchall() # 쿼리 결과
 
     cursor.close()
     conn.close()
@@ -52,30 +53,22 @@ def dashboard():
 def upload_file():
     """파일 업로드 화면 및 처리"""
     if request.method == 'POST':
-        uploaded_files = uploads.upload_file(request.files.getlist('image_files'))
-        # 'image_files'라는 이름으로 전송된 파일들을 리스트로 받음
         uploaded_files = request.files.getlist('image_files')
-
-        if not uploaded_files or uploaded_files[0].filename == '':
-            print("파일이 선택되지 않았습니다.")
-            return redirect(request.url)
-
-        # 1) 월별 폴더명 생성 (YYYYMM)
-        month_folder = datetime.now().strftime("%Y%m")
-        os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], month_folder), exist_ok=True)
-
-        for file in uploaded_files:
-            if file:
-                # 안전한 파일 이름으로 변경
-                filename = secure_filename(file.filename)
-                # 파일을 지정된 폴더에 저장
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], month_folder,filename))
-                print(f"'{filename}' 파일 저장 완료.")
         
-        # 업로드 완료 후, 결과 페이지나 대시보드로 리다이렉트
-        # return redirect(url_for('dashboard'))
-        return "파일 업로드 성공!" # 임시 메시지
+        # 수정된 함수를 호출하고, 저장된 파일 경로 리스트를 받습니다.
+        saved_info_list = upload_service.save_uploaded_files(app.config, uploaded_files)
 
+        if saved_info_list:
+            # 예측 함수를 호출하고, 결과를 받아옵니다.
+            prediction_results = predict_service.save_food_prediction(saved_info_list)
+            # prediction_results = predictor.run_prediction(saved_filepaths)
+
+            # 예측 결과를 담아 결과 페이지로 전달
+            return render_template('prediction_results.html', results=prediction_results)
+        else:
+            print("파일이 없습니다.")
+            return redirect(request.url)
+            
     # GET 요청 시에는 업로드 페이지를 보여줌
     return render_template('upload.html')
 
