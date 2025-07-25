@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}{{ menu_name }} 상세 정보{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center fw-bold">{{ menu_name }} 레시피 상세정보</h2>
+
+    {% if recipe %}
+    <div class="row">
+        <!-- 좌측: 기본 정보 -->
+        {% if image_url %}
+        <div class="card mb-4">
+            <img src="{{ url_for('uploaded_file', filename=image_url.replace('\\', '/')) }}"
+            alt="{{ menu_name }} 이미지"
+            style="width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px;">
+            <div class="card-body">
+                <p class="card-text text-center text-muted">가장 신뢰도 높은 이미지입니다.</p>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">기본 정보</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>⏱ 조리 시간:</strong> {{ recipe.cooking_time_minutes }}분</p>
+                    <p><strong>🔥 난이도:</strong> {{ recipe.difficulty_level | title }}</p>
+                    <p><strong>👥 인분:</strong> {{ recipe.servings }}인분</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">맛 특징</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ recipe.flavor_characteristics.replace('\n', '<br>') | safe }}</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">서빙 팁</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ recipe.serving_tips.replace('\n', '<br>') | safe }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 조리 및 영양 정보 -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">🧑‍🍳 조리 단계</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for step in recipe.cooking_steps.split('\n') %}
+                            <li class="list-group-item">{{ step }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">📋 조리 설명</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        {% for step in recipe.cooking_info.split('\n') %}
+                            <li>{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">🥗 영양 정보</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ recipe.nutrition_info.replace('\n', '<br>') | safe }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning" role="alert">
+        해당 메뉴의 레시피 정보를 찾을 수 없습니다.
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-outline-secondary">← 대시보드로 돌아가기</a>
+    </div>
+</div>
+{% endblock %}

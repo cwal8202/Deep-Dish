@@ -69,4 +69,78 @@
             </div>
         </div>
     </div>
+
+<canvas id="foodTrendChart" height="150"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch('/api/top5_chart_data')
+  .then(response => response.json())
+  .then(rawData => {
+    // 1. 최근 6개월 추출
+    const now = new Date();
+    const recentMonths = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const yearMonth = d.toISOString().slice(0, 7);
+      recentMonths.push(yearMonth);
+    }
+
+    // 2. menu_name 별로 월별 집계
+    const groupedData = {};
+    rawData.forEach(item => {
+      const menu = item.menu_name;
+      const month = new Date(item.upload_date).toISOString().slice(0, 7);
+
+      if (!groupedData[menu]) groupedData[menu] = {};
+      if (!groupedData[menu][month]) groupedData[menu][month] = 0;
+
+      groupedData[menu][month] += item.daily_count;
+    });
+
+    // 3. datasets 만들기
+    const colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff'];
+    const datasets = Object.keys(groupedData).map((menu, idx) => {
+      const data = recentMonths.map(month => groupedData[menu][month] || 0);
+      return {
+        label: menu,
+        data: data,
+        borderColor: colors[idx % colors.length],
+        fill: false,
+        tension: 0.3
+      };
+    });
+
+    // 4. x축: 한글 월
+    const labels = recentMonths.map(m => `${parseInt(m.split('-')[1])}월`);
+
+    // 5. Chart 생성
+    const ctx = document.getElementById('foodTrendChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: '최근 6개월 Top5 음식의 월별 언급량 추이'
+          }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: '월' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: '언급 수' }
+          }
+        }
+      }
+    });
+  });
+</script>
 {% endblock %}
