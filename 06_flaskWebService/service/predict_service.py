@@ -1,4 +1,4 @@
-from food_predict import predict_test2_3gpt as predictor
+from food_predict import predict_final as predictor
 from typing import List, Dict, Any
 from database.repository import analysis_results_repository
 from database.repository import menus_repository

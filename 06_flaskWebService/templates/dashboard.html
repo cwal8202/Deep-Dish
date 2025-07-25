@@ -3,90 +3,86 @@
 {% block title %}대시보드 - 푸드 트렌드 분석{% endblock %}
 
 {% block content %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">트렌드 분석 대시보드</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary">월별</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary">분기별</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary">연도별</button>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">트렌드 분석 대시보드</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">월별</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">분기별</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">연도별</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>음식 트렌드 Top 10</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for trend in food_trends %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ loop.index }}. {{ trend.menu_name }}
+                            <span class="badge bg-primary rounded-pill">{{ trend.mention_count }} 회</span>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item">표시할 데이터가 없습니다.</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5>음식 트렌드 Top 10</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        {% for trend in food_trends %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ loop.index }}. {{ trend.menu_name }}
-                                <span class="badge bg-primary rounded-pill">{{ trend.mention_count }} 회</span>
-                            </li>
-                        {% else %}
-                            <li class="list-group-item">표시할 데이터가 없습니다.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>식재료 트렌드 Top 10</h5>
             </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5>식재료 트렌드 Top 10</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        {% for trend in ingredient_trends %}
-                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ loop.index }}. {{ trend.ingredient_name }}
-                                <span class="badge bg-success rounded-pill">{{ trend.usage_frequency }} 회</span>
-                            </li>
-                        {% else %}
-                            <li class="list-group-item">표시할 데이터가 없습니다.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for trend in ingredient_trends %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ loop.index }}. {{ trend.ingredient_name }}
+                            <span class="badge bg-success rounded-pill">{{ trend.usage_count }} 회</span>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item">표시할 데이터가 없습니다.</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    <h5>주요 음식 언급량 변화</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="foodTrendChart"></canvas>
-                    <p class="text-center text-muted mt-2">차트 시각화 영역입니다.</p>
-                </div>
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5>주요 음식 언급량 변화 (최근 24개월)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="foodTrendChart" height="150"></canvas>
+                <p class="text-center text-muted mt-2">차트 시각화 영역입니다.</p>
             </div>
         </div>
     </div>
-
-<canvas id="foodTrendChart" height="150"></canvas>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 fetch('/api/top5_chart_data')
   .then(response => response.json())
   .then(rawData => {
-    // 1. 최근 6개월 추출
     const now = new Date();
     const recentMonths = [];
-    for (let i = 5; i >= 0; i--) {
+    for (let i = 23; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const yearMonth = d.toISOString().slice(0, 7);
       recentMonths.push(yearMonth);
     }
 
-    // 2. menu_name 별로 월별 집계
     const groupedData = {};
     rawData.forEach(item => {
       const menu = item.menu_name;
@@ -98,7 +94,6 @@ fetch('/api/top5_chart_data')
       groupedData[menu][month] += item.daily_count;
     });
 
-    // 3. datasets 만들기
     const colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff'];
     const datasets = Object.keys(groupedData).map((menu, idx) => {
       const data = recentMonths.map(month => groupedData[menu][month] || 0);
@@ -111,10 +106,16 @@ fetch('/api/top5_chart_data')
       };
     });
 
-    // 4. x축: 한글 월
-    const labels = recentMonths.map(m => `${parseInt(m.split('-')[1])}월`);
+    const labels = recentMonths.map(m => `${parseInt(m.split('-')[0])}년 ${parseInt(m.split('-')[1])}월`);
 
-    // 5. Chart 생성
+    // ✅ 모든 데이터셋의 최소값 찾기
+    let allValues = [];
+    datasets.forEach(ds => {
+      allValues = allValues.concat(ds.data);
+    });
+    // 데이터가 없는 경우를 대비하여 기본값은 0으로 설정
+    const minValue = allValues.length > 0 ? Math.min(...allValues) : 0;
+
     const ctx = document.getElementById('foodTrendChart').getContext('2d');
     new Chart(ctx, {
       type: 'line',
@@ -127,15 +128,26 @@ fetch('/api/top5_chart_data')
         plugins: {
           title: {
             display: true,
-            text: '최근 6개월 Top5 음식의 월별 언급량 추이'
+            text: '최근 24개월 Top5 음식의 월별 언급량 추이'
+          },
+          legend: {
+            position: 'top'
           }
         },
         scales: {
           x: {
-            title: { display: true, text: '월' }
+            title: { display: true, text: '월' },
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 12,
+              maxRotation: 0,
+              minRotation: 0
+            }
           },
           y: {
-            beginAtZero: true,
+            beginAtZero: false, // 0에서 시작하지 않도록 설정 유지
+            // 🔥 Y축의 최소값을 데이터의 실제 최소값으로 설정 (0 미만으로 내려가지 않음)
+            min: Math.max(0, minValue),
             title: { display: true, text: '언급 수' }
           }
         }

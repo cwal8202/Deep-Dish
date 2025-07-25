@@ -54,6 +54,7 @@
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const folderInput = document.getElementById('folder-input');
@@ -65,12 +66,9 @@
     const loadingModal = new bootstrap.Modal(document.getElementById('loading-modal'));
     let selectedFiles = [];
 
-    // '파일 선택' 버튼 클릭 시 파일 입력창 열기
     fileBtn.addEventListener('click', () => fileInput.click());
-    // '폴더 선택' 버튼 클릭 시 폴더 입력창 열기
     folderBtn.addEventListener('click', () => folderInput.click());
 
-    // 드래그 이벤트 (폴더 드래그는 브라우저별 지원이 다를 수 있음)
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-primary'); });
     dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('border-primary'); });
     dropZone.addEventListener('drop', (e) => {
@@ -79,49 +77,37 @@
         handleFiles(e.dataTransfer.files);
     });
 
-    // 파일 또는 폴더가 선택되었을 때의 이벤트 처리
     fileInput.addEventListener('change', () => handleFiles(fileInput.files));
     folderInput.addEventListener('change', () => handleFiles(folderInput.files));
 
     function handleFiles(files) {
         selectedFiles = [];
         fileList.innerHTML = '';
-
-        // 허용된 파일 타입 (MIME 타입) 리스트
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        
         let validFiles = true;
-
         const list = document.createElement('ul');
         list.className = 'list-group';
-        
-        // 각 파일을 순회하며 유효성 검사
+
         for (const file of files) {
-            // 파일 타입이 허용된 리스트에 있는지 확인
             if (allowedTypes.includes(file.type)) {
                 selectedFiles.push(file);
-
                 const listItem = document.createElement('li');
                 listItem.className = 'list-group-item';
                 const displayName = file.webkitRelativePath || file.name;
                 listItem.textContent = `${displayName} (${(file.size / 1024).toFixed(2)} KB)`;
                 list.appendChild(listItem);
             } else {
-                // 유효하지 않은 파일이 발견되면 경고 메시지 추가
                 const listItem = document.createElement('li');
                 listItem.className = 'list-group-item list-group-item-danger';
                 listItem.textContent = `${file.name} - 이미지 파일이 아닙니다.`;
                 list.appendChild(listItem);
-                validFiles = false; // 하나라도 유효하지 않으면 false로 설정
+                validFiles = false;
             }
         }
 
         fileList.appendChild(list);
-        
-        // 유효한 파일만 업로드 버튼 활성화
-        uploadBtn.disabled = !selectedFiles.length > 0;
-        
-        // (선택 사항) 만약 유효하지 않은 파일이 하나라도 있다면 메시지를 추가로 표시할 수도 있습니다.
+        uploadBtn.disabled = !(selectedFiles.length > 0);
+
         if (!validFiles) {
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-warning mt-3';
@@ -130,11 +116,10 @@
         }
     }
 
-    // 폼 제출 이벤트 리스너 추가
     uploadForm.addEventListener('submit', (e) => {
-        // 폼 제출 시 로딩 모달을 표시
         loadingModal.show();
     });
+});
 </script>
 
 <style>

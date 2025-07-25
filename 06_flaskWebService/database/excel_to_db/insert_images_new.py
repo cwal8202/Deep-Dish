@@ -15,13 +15,13 @@ DB_CONFIG = {
 }
 
 # --- 처리할 파일 정보 ---
-DIRECTORY_PATH = r'C:\ai_x\Deep-Dish\N시기별음식URL수집\N월별조회메뉴수집'
-SHEET_NAME = 'URL목록'
+DIRECTORY_PATH = r'C:\ai_x\Deep-Dish\N월별조회메뉴수집_비중반영_예측가능메뉴한정요약_결과'
+SHEET_NAME = 'url목록'
 
 def import_image_urls():
     db_conn = None
     cursor = None
-    try:
+    try:    
         db_conn = mysql.connector.connect(**DB_CONFIG)
         cursor = db_conn.cursor()
         print("MySQL DB에 성공적으로 연결되었습니다.")
@@ -40,7 +40,7 @@ def import_image_urls():
 
             match = re.search(r'_(\d{6})_', file_name)
             if not match:
-                print(f"[경고] 파일명에서 날짜를 찾을 수 없어 건너<binary data, 2 bytes>니다: {file_name}")
+                print(f"[경고] 파일명에서 날짜를 찾을 수 없어 건너뜁니다: {file_name}")
                 continue
             
             year_month = match.group(1)
@@ -49,22 +49,23 @@ def import_image_urls():
             created_at_str = f"{year}-{month}-01 00:00:00"
 
             try:
-                # === 수정된 부분 ===
-                # header=None 옵션을 제거하여 첫 행을 컬럼명으로 인식하게 하고,
-                # 'URL' 컬럼을 이름으로 직접 선택합니다.
                 df = pd.read_excel(file_path, sheet_name=SHEET_NAME)
-                
-                # 'URL'이라는 컬럼이 있는지 확인
-                if 'URL' not in df.columns:
-                    print(f"[경고] '{SHEET_NAME}' 시트에서 'URL' 컬럼을 찾을 수 없습니다.")
+
+                # 컬럼 존재 여부 확인
+                required_columns = {'URL', '메뉴', '예측_음식명'}
+                if not required_columns.issubset(df.columns):
+                    print(f"[경고] 필수 컬럼({required_columns})이 부족합니다.")
                     continue
 
-                urls = df['URL'].dropna().tolist()
-                
-                if not urls:
-                    print(f"'{SHEET_NAME}' 시트의 'URL' 컬럼에서 URL을 찾을 수 없습니다.")
+                # '메뉴'와 '예측_음식명'이 같은 행만 필터링
+                matched_df = df[df['메뉴'] == df['예측_음식명']].copy()
+
+                if matched_df.empty:
+                    print(f"[안내] '{file_name}'에서 조건에 맞는 데이터가 없습니다.")
                     continue
 
+                # 유효한 URL만 추출
+                urls = matched_df['URL'].dropna().tolist()
                 data_to_insert = [(url, 'naver', created_at_str) for url in urls]
 
                 sql_insert = "INSERT INTO images (image_url, image_source, created_at) VALUES (%s, %s, %s)"
