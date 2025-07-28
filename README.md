@@ -31,7 +31,7 @@
 [3. Gantt Chart](https://github.com/user-attachments/assets/f70563d6-6b56-4d2b-9b1d-02d38da478b9)<br>
 
 ## 0. 표지
-![서론0](https://github.com/user-attachments/assets/5b8140e9-43a9-493f-a056-e960b279b5af)
+![서론0]()
 
 ## 1. 주제 선정 및 배경
 ![서론1]()
@@ -40,5 +40,5 @@
 ![서론2]()
 
 ## 3. Gantt Chart
-![서론3](https://github.com/user-attachments/assets/f70563d6-6b56-4d2b-9b1d-02d38da478b9)
+![서론3]()
 
