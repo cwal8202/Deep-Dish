@@ -25,9 +25,10 @@
 </div>
 
 ## 목차
+[0. 표지](https://github.com/user-attachments/assets/f70563d6-6b56-4d2b-9b1d-02d38da478b9)
 [1. 주제 선정 및 배경](이미지 url을 가르키는 곳)<br>
-[2. 목적 및 필요성]()<br>
-[3. Gantt Chart()<br>
+[2. 목적 및 필요성](이미지 url을 가르키는 곳)<br>
+[3. Gantt Chart(https://github.com/user-attachments/assets/f70563d6-6b56-4d2b-9b1d-02d38da478b9)<br>
 
 ## 0. 표지
 ![서론0](https://github.com/user-attachments/assets/5b8140e9-43a9-493f-a056-e960b279b5af)
