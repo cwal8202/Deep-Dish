@@ -1,4 +1,4 @@
-from food_predict import predict_final as predictor
+from food_predict import predict_effib2 as predictor
 from typing import List, Dict, Any
 from database.repository import analysis_results_repository
 from database.repository import menus_repository
@@ -22,7 +22,7 @@ def save_food_prediction(saved_info_list: list[tuple[int, str]]) -> List[Dict[st
         status_message = 0
         predict_result_dict = {'image_id': predict_result['image_id'], 'result_type' : result_type,
                                'detected_id': menu_id, 'confidence_score': predict_result['confidence']}
-
+        print(predict_result_dict, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         # analyse_results db 저장
         if menu_id:
             analysis_data = AnalysisResult(
