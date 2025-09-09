@@ -1,0 +1,6 @@
+python 객체와 시키는 이유
+
+왜 객체지향프로그램으로 해야하나?
+- 유지보수, 협업등에 편리하기 때문.
+
+pandas, numpy, sklean, tensorflow 는 기본적으로 다 알아야함

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}예측 결과{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="fw-bold text-center mb-4">🧠 음식 예측 결과</h2>
+
+    {% if results %}
+        {% for result in results %}
+        <div class="card shadow-sm border-start border-4 border-primary mb-4">
+            <div class="card-body">
+                <!-- 상단 제목 및 상태 -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0">📂 파일 ID: {{ result.image_id }}</h5>
+                    {% if result.status_message > 0 %}
+                        <span class="badge bg-success">✅ 분석 완료</span>
+                    {% else %}
+                        <span class="badge bg-danger">❌ 정보 없음</span>
+                    {% endif %}
+                </div>
+
+                {% if result.status_message > 0 %}
+                <!-- 예측 라벨 -->
+                <div class="mb-3">
+                    <p class="mb-1">
+                        <strong>🍽️ 예측 라벨:</strong>
+                        <span class="badge bg-primary">{{ result.predicted_label }}</span>
+                        <a href="{{ url_for('menu_detail', menu_id=result.detected_id) }}?menu_name={{ result.predicted_label }}"
+                           class="btn btn-sm btn-outline-primary ms-2">
+                            🔍 상세정보 보기
+                        </a>
+                    </p>
+                    <p class="mb-0"><strong>📊 신뢰도:</strong> {{ result.confidence }}%</p>
+                </div>
+
+                <!-- 주요 재료 & 양념 재료 -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted fw-semibold">🥩 주요 재료</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            {% if result.main_ingredients %}
+                                {% for ing in result.main_ingredients %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    {{ ing.ingredient_name }}
+                                    <span class="badge bg-secondary">{{ ing.amount|default("") }} {{ ing.unit }}</span>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item text-muted">없음</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-muted fw-semibold">🧂 양념 재료</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            {% if result.seasoning_ingredients %}
+                                {% for ing in result.seasoning_ingredients %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    {{ ing.ingredient_name }}
+                                    <span class="badge bg-secondary">{{ ing.amount|default("") }} {{ ing.unit }}</span>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item text-muted">없음</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 확률 Top 5 -->
+                <h6 class="text-muted fw-semibold">📈 확률 상위 Top 5</h6>
+                <ul class="list-group list-group-flush">
+                    {% for label, prob in result.probabilities.items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ label }}</span>
+                        <span class="badge bg-info text-dark">{{ prob }}%</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                {% else %}
+                <p class="text-danger mt-3">해당 음식에 대한 예측 결과가 없습니다.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning text-center">
+            예측 결과가 없습니다. 다시 시도해 주세요.
+        </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="/upload" class="btn btn-outline-secondary">← 다시 업로드하기</a>
+    </div>
+</div>
+{% endblock %}

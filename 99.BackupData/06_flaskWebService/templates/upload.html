@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}이미지 업로드 - 푸드 트렌드 분석{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2 class="h3">이미지 파일/폴더 업로드</h2>
+                    <p class="text-muted">분석할 이미지 파일 또는 폴더를 선택하거나 아래 영역으로 드래그하세요.</p>
+                </div>
+                <div class="card-body">
+                    <form id="upload-form" action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                        
+                        <div id="drop-zone" class="text-center p-5 border-2 border-dashed rounded-3">
+                            <p>여기로 파일 또는 폴더를 드래그하세요</p>
+                            <p class="small text-muted">또는</p>
+                            <div class="btn-group" role="group">
+                                <label id="file-btn" class="btn btn-secondary">파일 선택</label>
+                                <label id="folder-btn" class="btn btn-folder">폴더 선택</label>
+                            </div>
+                            <input type="file" id="file-input" name="image_files" multiple class="d-none" accept="image/jpeg, image/png, image/gif, image/webp">
+                            <input type="file" id="folder-input" name="image_files" webkitdirectory class="d-none" accept="image/jpeg, image/png, image/gif, image/webp">
+                        </div>
+
+                        <div id="file-list" class="mt-3"></div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button id="upload-btn" type="submit" class="btn btn-primary btn-lg" disabled>
+                                업로드 시작
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loading-modal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h4 class="mt-3">이미지를 분석 중입니다...</h4>
+                <p class="text-muted">잠시만 기다려 주세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const folderInput = document.getElementById('folder-input');
+    const fileBtn = document.getElementById('file-btn');
+    const folderBtn = document.getElementById('folder-btn');
+    const fileList = document.getElementById('file-list');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadForm = document.getElementById('upload-form');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loading-modal'));
+    let selectedFiles = [];
+
+    fileBtn.addEventListener('click', () => fileInput.click());
+    folderBtn.addEventListener('click', () => folderInput.click());
+
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-primary'); });
+    dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('border-primary'); });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-primary');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+    folderInput.addEventListener('change', () => handleFiles(folderInput.files));
+
+    function handleFiles(files) {
+        selectedFiles = [];
+        fileList.innerHTML = '';
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        let validFiles = true;
+        const list = document.createElement('ul');
+        list.className = 'list-group';
+
+        for (const file of files) {
+            if (allowedTypes.includes(file.type)) {
+                selectedFiles.push(file);
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                const displayName = file.webkitRelativePath || file.name;
+                listItem.textContent = `${displayName} (${(file.size / 1024).toFixed(2)} KB)`;
+                list.appendChild(listItem);
+            } else {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item list-group-item-danger';
+                listItem.textContent = `${file.name} - 이미지 파일이 아닙니다.`;
+                list.appendChild(listItem);
+                validFiles = false;
+            }
+        }
+
+        fileList.appendChild(list);
+        uploadBtn.disabled = !(selectedFiles.length > 0);
+
+        if (!validFiles) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-warning mt-3';
+            alertDiv.textContent = '일부 파일은 이미지 형식이 아니어서 제외되었습니다.';
+            fileList.prepend(alertDiv);
+        }
+    }
+
+    uploadForm.addEventListener('submit', (e) => {
+        loadingModal.show();
+    });
+});
+</script>
+
+<style>
+    .border-dashed { border-style: dashed !important; }
+    #upload-btn:disabled { opacity: 0.1; cursor: not-allowed; }
+</style>
+{% endblock %}

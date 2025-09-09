@@ -1,0 +1,63 @@
+erDiagram
+    IMAGES {
+        BIGINT    image_id PK
+        VARCHAR   image_url
+        VARCHAR   image_source
+        TIMESTAMP created_at
+    }
+    MENUS {
+        INT       menu_id PK
+        VARCHAR   menu_name
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    INGREDIENTS {
+        INT       ingredient_id PK
+        VARCHAR   ingredient_name
+        TIMESTAMP created_at
+    }
+    MENU_INGREDIENTS {
+        INT       menu_ingredient_id PK
+        INT       menu_id FK
+        INT       ingredient_id FK
+        FLOAT     amount
+        VARCHAR   unit
+        TIMESTAMP created_at
+    }
+    MENU_RECIPES {
+        INT       recipe_id PK
+        INT       menu_id FK
+        TEXT      cooking_steps
+        TEXT      cooking_info
+        TEXT      flavor_characteristics
+        TEXT      nutrition_info
+        TEXT      serving_tips
+        INT       cooking_time_minutes
+        ENUM      difficulty_level
+        INT       servings
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    BRANDS {
+        INT       brand_id PK
+        VARCHAR   brand_name
+    }
+    ANALYSIS_RESULTS {
+        BIGINT    result_id PK
+        BIGINT    image_id FK
+        ENUM      result_type
+        INT       detected_id
+        FLOAT     confidence_score
+        TIMESTAMP created_at
+    }
+
+    IMAGES ||--o{ ANALYSIS_RESULTS : "has"
+    MENUS ||--o{ MENU_INGREDIENTS    : "uses"
+    INGREDIENTS ||--o{ MENU_INGREDIENTS: "in"
+    MENUS ||--o{ MENU_RECIPES        : "has"
+         BRANDS ||--o{ ANALYSIS_RESULTS : "has"
+
+    %% 다만 analysis_results.detected_id 컬럼은 result_type 값에 따라
+    %% - FOOD 일 때 menus.menu_id
+    %% - BRAND 일 때 brands.brand_id
+    %% 를 참조하는 다형(Polymorphic) FK 구조입니다.
