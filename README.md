@@ -20,13 +20,16 @@
 
 ## <a name="cover"></a> 0. 표지
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/a295db3a-360c-49c9-a587-a41bfdd1d04a" />
+
 ## <a name="table-of-contents"></a> 1. 목차
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/e8515f30-7f41-49f0-9915-66c010633138" />
+
 ## <a name="overview"></a> 2. 개요
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/ba85d8e1-c31c-4ecc-a216-16cbe26b5c39" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/b9656cfe-579c-4767-b1ae-06fc0b592516" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/e9706589-fb37-418b-a828-1014a97920ab" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/b02a8681-650e-49c6-9d56-3efaf757aa4c" />
+
 ## <a name="data-and-model"></a> 3. 데이터 및 모델
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/fc282e2d-ca64-4a83-b066-49e98bac2ba5" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/7dc3dcf5-6e84-4c8f-b939-4bc606b6470d" />
@@ -51,6 +54,7 @@
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/86caf3ae-be02-4fc4-a347-f0944e52fe90" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/779d70d2-f429-4ba7-a2ec-f99cb72263bf" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/c98624ac-1bfd-4ceb-b169-bc7e643b7202" />
+
 ## <a name="web-service"></a> 4. 웹 서비스
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/3a0edac9-29e1-454a-9e21-2b48a9c6e7e6" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/26860dd0-86fb-4418-b132-c63d762cf908" />
@@ -60,11 +64,13 @@
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/b9402bb7-8037-4e1d-a77f-60791485ada1" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/383df72a-30dc-47e6-9d9f-b4be740fa07e" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/13336147-3e01-43ac-90ef-7824c7bd285e" />
+
 ## <a name="environment"></a> 5. 개발 환경
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/99392b2d-a4fc-4265-82fb-5e2d10125167" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/f90622d2-43ea-4e5f-b2bd-899a7ddef90a" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/74a98039-7b00-457b-a2ab-386f27cf067e" />
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/bac67608-2ef3-4eab-b04a-8d90b35ea156" />
+
 ## <a name="expected-effects"></a> 6. 기대효과
 ![서론3](https://github.com/user-attachments/assets/f70563d6-6b56-4d2b-9b1d-02d38da478b9)
 <img width="1123" height="794" alt="Image" src="https://github.com/user-attachments/assets/08fc366e-6ee1-40ef-b16b-8286438cd453" />
