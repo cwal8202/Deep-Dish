@@ -1,14 +1,13 @@
-# 프로젝트명
-> 1st Team Project
-
+# 음식 이미지 분석 및 트랜드 분석 (Deep-Dish)
+> 프로젝트 개요
+- 프로젝트 소개 : 사용자가 음식 사진을 업로드 하면 딥러닝 모델이 음식을 인식하고, 관련된 레시피 정보와 음식 트렌드를 시각적으로 보여주는 웹 서비스
 - 프로젝트 명 : Deep-Dish(간단설명)
 - 인원 : 3명
 - 기간 : 2025.07.07 ~ 2025.07.25
 - 언어 : Python 3.10.9
 - DBMS : MySQL 
-- Python Library : ..
+- ML/DL : Tensorflow, Keras, Scikit-learn(XGBOOST)
 - micro Web Framework : flask
-- 프로젝트 소개 : 간단하게 데이터 전처리와 모델을 소개
 
 <div align=center> 
   <img src="https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white"> 
